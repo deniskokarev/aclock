@@ -5,6 +5,8 @@
 #include "Timezone.h"
 
 RTC_DS3231 rtc;
+const int LMT86Pin = A3;
+const float aVRefmV = 4950.0;	// referrence voltage in mV
 
 //US Eastern Time Zone (New York, Detroit)
 TimeChangeRule myDST = {"EDT", Second, Sun, Mar, 2, -240};    //Daylight time = UTC - 4 hours
@@ -48,7 +50,7 @@ void sPrintDigits(int val) {
 }
 
 //Function to print time with time zone
-void printTime(time_t t, char *tz) {
+void printTemp(time_t t, char *tz, int temperature) {
     sPrintI00(hour(t));
     sPrintDigits(minute(t));
     sPrintDigits(second(t));
@@ -62,16 +64,25 @@ void printTime(time_t t, char *tz) {
     Serial.print(year(t));
     Serial.print(' ');
     Serial.print(tz);
-    Serial.println();
+    Serial.print(' ');
+    sPrintI00(temperature);
+	Serial.println("°C");
+}
+
+float getTempLMT86(short pin) {
+	int tempRead = analogRead(pin);
+	// as per http://www.ti.com/lit/ds/symlink/lmt86-q1.pdf
+	float mV = tempRead*aVRefmV/1024.0;
+	float t = (10.888-sqrt(10.888*10.888+4*0.00347*(1777.3-mV)))/(2*(-0.00347))+30.0;
+	return t;
 }
 
 void loop() {
 	TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abbrev
 	time_t local;
 	time_t utc = rtc.now().unixtime();
-    printTime(utc, (char*)"UTC");
     local = myTZ.toLocal(utc, &tcr);
-    printTime(local, tcr -> abbrev);
+	printTemp(local, tcr->abbrev, getTempLMT86(LMT86Pin));
     delay(3000);
 }
 
