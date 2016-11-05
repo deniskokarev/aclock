@@ -1,16 +1,17 @@
 #include "LCD_Functions.h"
 #include <Wire.h>
 #include "RTClib.h"
+#include "Time.h"
+#include "Timezone.h"
 
 RTC_DS3231 rtc;
 
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+//US Eastern Time Zone (New York, Detroit)
+TimeChangeRule myDST = {"EDT", Second, Sun, Mar, 2, -240};    //Daylight time = UTC - 4 hours
+TimeChangeRule mySTD = {"EST", First, Sun, Nov, 2, -300};     //Standard time = UTC - 5 hours
+Timezone myTZ(myDST, mySTD);
 
 void setup() {
-
-#ifndef ESP8266
-	while (!Serial); // for Leonardo/Micro/Zero
-#endif
 
 	Serial.begin(9600);
 
@@ -23,55 +24,54 @@ void setup() {
 
 	if (rtc.lostPower()) {
 		Serial.println("RTC lost power, lets set the time!");
-		// following line sets the RTC to the date & time this sketch was compiled
-		rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+		rtc.adjust(DateTime(1970, 1, 1, 0, 0, 0));
 		// This line sets the RTC with an explicit date & time, for example to set
 		// January 21, 2014 at 3am you would call:
 		// rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
 	}
 }
 
-void loop() {
-    DateTime now = rtc.now();
-    
-    Serial.print(now.year(), DEC);
-    Serial.print('/');
-    Serial.print(now.month(), DEC);
-    Serial.print('/');
-    Serial.print(now.day(), DEC);
-    Serial.print(" (");
-    Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
-    Serial.print(") ");
-    Serial.print(now.hour(), DEC);
+//Print an integer in "00" format (with leading zero).
+//Input value assumed to be between 0 and 99.
+void sPrintI00(int val) {
+    if (val < 10) Serial.print('0');
+    Serial.print(val, DEC);
+    return;
+}
+
+//Print an integer in ":00" format (with leading zero).
+//Input value assumed to be between 0 and 99.
+void sPrintDigits(int val) {
     Serial.print(':');
-    Serial.print(now.minute(), DEC);
-    Serial.print(':');
-    Serial.print(now.second(), DEC);
-    Serial.println();
-    
-    Serial.print(" since midnight 1/1/1970 = ");
-    Serial.print(now.unixtime());
-    Serial.print("s = ");
-    Serial.print(now.unixtime() / 86400L);
-    Serial.println("d");
-    
-    // calculate a date which is 7 days and 30 seconds into the future
-    DateTime future (now + TimeSpan(7,12,30,6));
-    
-    Serial.print(" now + 7d + 30s: ");
-    Serial.print(future.year(), DEC);
-    Serial.print('/');
-    Serial.print(future.month(), DEC);
-    Serial.print('/');
-    Serial.print(future.day(), DEC);
+    if(val < 10) Serial.print('0');
+    Serial.print(val, DEC);
+}
+
+//Function to print time with time zone
+void printTime(time_t t, char *tz) {
+    sPrintI00(hour(t));
+    sPrintDigits(minute(t));
+    sPrintDigits(second(t));
     Serial.print(' ');
-    Serial.print(future.hour(), DEC);
-    Serial.print(':');
-    Serial.print(future.minute(), DEC);
-    Serial.print(':');
-    Serial.print(future.second(), DEC);
+    Serial.print(dayShortStr(weekday(t)));
+    Serial.print(' ');
+    sPrintI00(day(t));
+    Serial.print(' ');
+    Serial.print(monthShortStr(month(t)));
+    Serial.print(' ');
+    Serial.print(year(t));
+    Serial.print(' ');
+    Serial.print(tz);
     Serial.println();
-    
-    Serial.println();
+}
+
+void loop() {
+	TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abbrev
+	time_t local;
+	time_t utc = rtc.now().unixtime();
+    printTime(utc, (char*)"UTC");
+    local = myTZ.toLocal(utc, &tcr);
+    printTime(local, tcr -> abbrev);
     delay(3000);
 }
+

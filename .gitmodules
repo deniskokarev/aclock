@@ -4,3 +4,9 @@
 [submodule "Arduino-Makefile"]
 	path = Arduino-Makefile
 	url = https://github.com/mjoldfield/Arduino-Makefile
+[submodule "Timezone"]
+	path = Timezone
+	url = https://github.com/JChristensen/Timezone
+[submodule "Time"]
+	path = Time
+	url = https://github.com/PaulStoffregen/Time

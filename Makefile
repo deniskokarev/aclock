@@ -4,7 +4,7 @@
 # (to quit from screen enter: ^a + ^\)
 #
 BOARD_TAG = uno
-ARDUINO_LIBS = SPI Wire RTClib
+ARDUINO_LIBS = SPI Wire RTClib Time Timezone
 BOARD := uno
 TARGET := aclock
 USER_LIB_PATH = .
