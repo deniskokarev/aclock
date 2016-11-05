@@ -5,9 +5,9 @@ The board is single-sided suitable for DIY and fits the screen component "native
 
 Software works with Arduino SDK v1.6
 
-git submodule add https://github.com/mjoldfield/Arduino-Makefile
-git submodule add https://github.com/adafruit/RTClib
-git submodule add https://github.com/PaulStoffregen/Time
-git submodule add https://github.com/JChristensen/Timezone
-
-Source code for Nokia LCD demo is taken from https://learn.sparkfun.com/tutorials/graphic-lcd-hookup-guide
+Used modules:
+- git submodule add https://github.com/mjoldfield/Arduino-Makefile
+- git submodule add https://github.com/adafruit/RTClib
+- git submodule add https://github.com/PaulStoffregen/Time
+- git submodule add https://github.com/JChristensen/Timezone
+- Nokia LCD demo https://learn.sparkfun.com/tutorials/graphic-lcd-hookup-guide
