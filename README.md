@@ -24,4 +24,4 @@ Used modules:
 - git submodule add https://github.com/JChristensen/Timezone
 - Nokia LCD demo https://learn.sparkfun.com/tutorials/graphic-lcd-hookup-guide
 
-![Complete Device](https://github.com/deniskokarev/nokialcd/blob/master/CompleteDevice.jpg "Complete Device")
+![Complete Device](https://github.com/deniskokarev/aclock/blob/master/CompleteDevice.jpg "Complete Device")
