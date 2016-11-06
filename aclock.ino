@@ -6,7 +6,7 @@
 
 RTC_DS3231 rtc;
 const int LMT86Pin = A3;
-const float aVRefmV = 4950.0;	// referrence voltage in mV
+const float aVRefmV = 4950.0;	// reference voltage in mV
 
 //US Eastern Time Zone (New York, Detroit)
 TimeChangeRule myDST = {"EDT", Second, Sun, Mar, 2, -240};	  //Daylight time = UTC - 4 hours
@@ -16,8 +16,15 @@ Timezone myTZ(myDST, mySTD);
 void setup() {
 
 	Serial.begin(9600);
-
+	while (!Serial) {
+		; // wait for serial port to connect. Needed for native USB port only
+	}
+	delay(1000);
+	lcdBegin(); // This will setup our pins, and initialize the LCD
+	
 	delay(3000); // wait for console opening
+	clearDisplay(WHITE);
+	updateDisplay();
 
 	if (! rtc.begin()) {
 		Serial.println("Couldn't find RTC");
@@ -25,48 +32,56 @@ void setup() {
 	}
 
 	if (rtc.lostPower()) {
-		Serial.println("RTC lost power, lets set the time!");
-		rtc.adjust(DateTime(1970, 1, 1, 0, 0, 0));
-		// This line sets the RTC with an explicit date & time, for example to set
-		// January 21, 2014 at 3am you would call:
-		// rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
+		setStr((char*)"Lost power ;-(", 0, 10, BLACK);
+		setStr((char*)"Enter time_t", 0, 20, BLACK);
+		setStr((char*)"@serial port", 0, 30, BLACK);
+		updateDisplay();
+		int c = -1;
+		char buf[16];
+		char *s;
+		int sz = sizeof(buf);
+		uint32_t time = 0;
+		//Serial.setTimeout(1000);
+		while (!time) { 
+			Serial.print(String("Enter unix time: "));
+			s = buf;
+			while (c != '\n' && c != '\r' && sz > 1) {
+				c = -1;
+				while (c == -1)
+					c = Serial.read();
+				Serial.write(c);
+				*s++ = c;
+				sz--;
+			}
+			Serial.println();
+			*s = 0;
+			time = atol(buf);
+		}
+		Serial.print(String("thank you for entering "));
+		Serial.println(time, DEC);
+		rtc.adjust(DateTime(time));
+		clearDisplay(WHITE);
+		updateDisplay();
 	}
-}
-
-//Print an integer in "00" format (with leading zero).
-//Input value assumed to be between 0 and 99.
-void sPrintI00(int val) {
-	if (val < 10) Serial.print('0');
-	Serial.print(val, DEC);
-	return;
-}
-
-//Print an integer in ":00" format (with leading zero).
-//Input value assumed to be between 0 and 99.
-void sPrintDigits(int val) {
-	Serial.print(':');
-	if(val < 10) Serial.print('0');
-	Serial.print(val, DEC);
 }
 
 //Function to print time with time zone
 void printTemp(time_t t, char *tz, int temperature) {
-	sPrintI00(hour(t));
-	sPrintDigits(minute(t));
-	sPrintDigits(second(t));
+	char buf[16];
+	snprintf(buf, sizeof(buf), "%02d:%02d:%02d", hour(t), minute(t), second(t));
+	Serial.print(buf);
 	Serial.print(' ');
-	Serial.print(dayShortStr(weekday(t)));
+	setStr(buf, 0, 10, BLACK);
+	snprintf(buf, sizeof(buf), "%02d %-3.3s %04d", day(t), monthShortStr(month(t)), year(t));
+	Serial.print(buf);
 	Serial.print(' ');
-	sPrintI00(day(t));
+	setStr(buf, 0, 20, BLACK);
+	snprintf(buf, sizeof(buf), "TEMP: %02d C", temperature);
+	Serial.print(buf);
 	Serial.print(' ');
-	Serial.print(monthShortStr(month(t)));
-	Serial.print(' ');
-	Serial.print(year(t));
-	Serial.print(' ');
-	Serial.print(tz);
-	Serial.print(' ');
-	sPrintI00(temperature);
-	Serial.println("°C");
+	setStr(buf, 0, 30, BLACK);
+	Serial.println();
+	updateDisplay();
 }
 
 float getTempLMT86(short pin) {
@@ -83,6 +98,6 @@ void loop() {
 	time_t utc = rtc.now().unixtime();
 	local = myTZ.toLocal(utc, &tcr);
 	printTemp(local, tcr->abbrev, getTempLMT86(LMT86Pin));
-	delay(3000);
+	delay(1000);
 }
 
