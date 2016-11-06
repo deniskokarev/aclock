@@ -7,7 +7,6 @@
 RTC_DS3231 rtc;
 const int LMT86Pin = A3;
 const float aVRefmV = 4950.0;	// reference voltage in mV
-
 //US Eastern Time Zone (New York, Detroit)
 TimeChangeRule myDST = {"EDT", Second, Sun, Mar, 2, -240};	  //Daylight time = UTC - 4 hours
 TimeChangeRule mySTD = {"EST", First, Sun, Nov, 2, -300};	  //Standard time = UTC - 5 hours
@@ -36,15 +35,16 @@ void setup() {
 		setStr((char*)"Enter time_t", 0, 20, BLACK);
 		setStr((char*)"@serial port", 0, 30, BLACK);
 		updateDisplay();
-		int c = -1;
+		int c;
 		char buf[16];
 		char *s;
-		int sz = sizeof(buf);
+		int sz;
 		uint32_t time = 0;
-		//Serial.setTimeout(1000);
 		while (!time) { 
 			Serial.print(String("Enter unix time: "));
+			c = -1;
 			s = buf;
+			sz = sizeof(buf);
 			while (c != '\n' && c != '\r' && sz > 1) {
 				c = -1;
 				while (c == -1)
