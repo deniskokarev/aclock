@@ -1,5 +1,9 @@
+#
+# To develop for Aurduino UNO on Mac OSX 10.10 (Yesemite) with XCode 7.2
+#
 -std=c++11
 -Wall
+-D__AVR_ATmega328P__
 -DF_CPU=16000000L
 -DARDUINO=1611
 -DARDUINO_ARCH_AVR
@@ -11,6 +15,7 @@
 -I./Timezone
 -I./Adafruit-GFX-Library
 -I./Adafruit-PCD8544-Nokia-5110-LCD-library
+-I/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include
 -I/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino
 -I/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/standard
 -I/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/SPI/src

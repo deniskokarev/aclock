@@ -1,10 +1,10 @@
-#include "Arduino.h"
+#include <Arduino.h>
+#include <avr/sleep.h>
 #include "RTClib.h"
 #include "Time.h"
 #include "Timezone.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_PCD8544.h"
-#include <avr/sleep.h>
 
 const byte tempOptPin = 2; // F/C selection
 enum TEMP_OPT {
@@ -22,9 +22,9 @@ Timezone myTZ(myDST, mySTD);
 // Hardware SPI (faster, but must use certain hardware pins):
 // SCK is LCD serial clock (SCLK) - this is pin 13 on Arduino Uno
 // MOSI is LCD DIN - this is pin 11 on an Arduino Uno
-const byte scePin = 6;   // SCE - Chip select
-const byte rstPin = 7;   // RST - Reset
-const byte dcPin = 5;    // DC - Data/Command
+const byte scePin = 6;	 // SCE - Chip select
+const byte rstPin = 7;	 // RST - Reset
+const byte dcPin = 5;	 // DC - Data/Command
 Adafruit_PCD8544 display = Adafruit_PCD8544(dcPin, scePin, rstPin);
 
 static void displayWarnSetTime() {
@@ -89,7 +89,7 @@ void setup() {
 
 		display.clearDisplay();
 	}
-	// enabling 1Hz timer from rtc (connected to rtcInterruptPin)
+	// enabling 1Hz timer on rtc which is wired to rtcInterruptPin
 	rtc.writeSqwPinMode(DS3231_SquareWave1Hz);
 }
 
@@ -142,9 +142,7 @@ static void wake () {
 	// nop
 }
 
-
-void sleepNow()			// here we put the arduino to sleep
-{
+void sleepUntilInterrupted() {		
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);   // sleep mode is set here
  
 	sleep_enable();			 // enables the sleep bit in the mcucr register
@@ -159,6 +157,6 @@ void sleepNow()			// here we put the arduino to sleep
 }
 
 void loop() {
-	sleepNow();
+	sleepUntilInterrupted();
 	refresh();
 }
