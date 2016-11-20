@@ -10,3 +10,9 @@
 [submodule "Time"]
 	path = Time
 	url = https://github.com/PaulStoffregen/Time
+[submodule "Adafruit-PCD8544-Nokia-5110-LCD-library"]
+	path = Adafruit-PCD8544-Nokia-5110-LCD-library
+	url = https://github.com/adafruit/Adafruit-PCD8544-Nokia-5110-LCD-library
+[submodule "Adafruit-GFX-Library"]
+	path = Adafruit-GFX-Library
+	url = https://github.com/adafruit/Adafruit-GFX-Library

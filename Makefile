@@ -4,7 +4,7 @@
 # (to quit from screen enter: ^a + ^\)
 #
 BOARD_TAG = uno
-ARDUINO_LIBS = SPI Wire RTClib Time Timezone
+ARDUINO_LIBS = SPI Wire RTClib Time Timezone Adafruit-GFX-Library Adafruit-PCD8544-Nokia-5110-LCD-library
 BOARD := uno
 TARGET := aclock
 USER_LIB_PATH = .

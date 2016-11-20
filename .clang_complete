@@ -9,6 +9,8 @@
 -I./RTClib
 -I./Time
 -I./Timezone
+-I./Adafruit-GFX-Library
+-I./Adafruit-PCD8544-Nokia-5110-LCD-library
 -I/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino
 -I/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/standard
 -I/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/SPI/src

@@ -1,47 +1,64 @@
-#include "LCD_Functions.h"
-#include <Wire.h>
 #include "RTClib.h"
 #include "Time.h"
 #include "Timezone.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_PCD8544.h"
+#include <avr/sleep.h>
 
 RTC_DS3231 rtc;
-const int LMT86Pin = A3;
-const float aVRefmV = 4950.0;	// reference voltage in mV
+const int LMT86Pin = A3;		// analog temperature sensor
+const float aVRefmV = 3270.0;	// analog reference voltage in mV
 //US Eastern Time Zone (New York, Detroit)
 TimeChangeRule myDST = {"EDT", Second, Sun, Mar, 2, -240};	  //Daylight time = UTC - 4 hours
 TimeChangeRule mySTD = {"EST", First, Sun, Nov, 2, -300};	  //Standard time = UTC - 5 hours
 Timezone myTZ(myDST, mySTD);
+// Hardware SPI (faster, but must use certain hardware pins):
+// SCK is LCD serial clock (SCLK) - this is pin 13 on Arduino Uno
+// MOSI is LCD DIN - this is pin 11 on an Arduino Uno
+const int scePin = 6;   // SCE - Chip select
+const int rstPin = 7;   // RST - Reset
+const int dcPin = 5;    // DC - Data/Command
+Adafruit_PCD8544 display = Adafruit_PCD8544(dcPin, scePin, rstPin);
+
+static void displayWarnSetTime() {
+	display.setTextSize(1);
+	display.setTextColor(BLACK);
+	display.setCursor(0,0);
+	display.println("Lost power ;-(");
+	display.println("Use serial port");
+	display.println("to set time");
+	display.display();
+}
 
 void setup() {
+	analogReference(EXTERNAL);	// our AREF is 3.3V
+	display.begin();
+	// init done
+	// you can change the contrast around to adapt the display
+	// for the best viewing!
+	display.setContrast(50);
 
 	Serial.begin(9600);
 	while (!Serial) {
 		; // wait for serial port to connect. Needed for native USB port only
 	}
 	delay(1000);
-	lcdBegin(); // This will setup our pins, and initialize the LCD
-	
-	delay(3000); // wait for console opening
-	clearDisplay(WHITE);
-	updateDisplay();
-
-	if (! rtc.begin()) {
+	if (!rtc.begin()) {
 		Serial.println("Couldn't find RTC");
 		while (1);
 	}
 
 	if (rtc.lostPower()) {
-		setStr((char*)"Lost power ;-(", 0, 10, BLACK);
-		setStr((char*)"Enter time_t", 0, 20, BLACK);
-		setStr((char*)"@serial port", 0, 30, BLACK);
-		updateDisplay();
 		int c;
 		char buf[16];
 		char *s;
 		int sz;
 		uint32_t time = 0;
+
+		displayWarnSetTime();
+
 		while (!time) { 
-			Serial.print(String("Enter unix time: "));
+			Serial.print(String("Enter UTC unix time: "));
 			c = -1;
 			s = buf;
 			sz = sizeof(buf);
@@ -60,28 +77,32 @@ void setup() {
 		Serial.print(String("thank you for entering "));
 		Serial.println(time, DEC);
 		rtc.adjust(DateTime(time));
-		clearDisplay(WHITE);
-		updateDisplay();
+
+		display.clearDisplay();
 	}
 }
 
 //Function to print time with time zone
 void printTemp(time_t t, char *tz, int temperature) {
 	char buf[16];
+	display.fillScreen(WHITE),
+	display.setTextSize(1);
+	display.setTextColor(BLACK);
+	display.setCursor(0, 0);
 	snprintf(buf, sizeof(buf), "%02d:%02d:%02d", hour(t), minute(t), second(t));
 	Serial.print(buf);
 	Serial.print(' ');
-	setStr(buf, 0, 10, BLACK);
+	display.println(buf);
 	snprintf(buf, sizeof(buf), "%02d %-3.3s %04d", day(t), monthShortStr(month(t)), year(t));
 	Serial.print(buf);
 	Serial.print(' ');
-	setStr(buf, 0, 20, BLACK);
+	display.println(buf);
 	snprintf(buf, sizeof(buf), "TEMP: %02d C", temperature);
 	Serial.print(buf);
 	Serial.print(' ');
-	setStr(buf, 0, 30, BLACK);
+	display.println(buf);
 	Serial.println();
-	updateDisplay();
+	display.display();
 }
 
 float getTempLMT86(short pin) {

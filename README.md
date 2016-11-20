@@ -25,6 +25,7 @@ Used modules:
 - git submodule add https://github.com/adafruit/RTClib
 - git submodule add https://github.com/PaulStoffregen/Time
 - git submodule add https://github.com/JChristensen/Timezone
-- Nokia LCD demo https://learn.sparkfun.com/tutorials/graphic-lcd-hookup-guide
+- git submodule add https://github.com/adafruit/Adafruit-GFX-Library
+- git submodule add https://github.com/adafruit/Adafruit-PCD8544-Nokia-5110-LCD-library
 
 ![Complete Device](https://github.com/deniskokarev/aclock/blob/master/CompleteDevice.jpg "Complete Device")
